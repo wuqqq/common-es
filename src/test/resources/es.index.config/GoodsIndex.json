@@ -1,0 +1,109 @@
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "my_pinyin": {
+          "type": "pinyin",
+          "keep_separate_first_letter": false,
+          "keep_joined_full_pinyin": true,
+          "keep_none_chinese_in_joined_full_pinyin": true,
+          "remove_duplicated_term": true,
+          "keep_original": true
+        }
+      },
+      "analyzer": {
+        "pinyin_analyzer": {
+          "type": "custom",
+          "tokenizer": "my_pinyin"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "goods": {
+      "properties": {
+        "goodsNo": {
+          "type": "keyword",
+          "index": "not_analyzed",
+          "ignore_above": 256
+        },
+        "shelfCode": {
+          "type": "keyword",
+          "index": "not_analyzed",
+          "ignore_above": 256
+        },
+        "merchantId": {
+          "type": "keyword",
+          "index": "not_analyzed",
+          "ignore_above": 256
+        },
+        "goodsName": {
+          "type": "text",
+          "analyzer": "ik_smart",
+          "fields": {
+            "pinyin": {
+              "type": "text",
+              "term_vector": "with_offsets",
+              "analyzer": "pinyin_analyzer",
+              "boost": 10
+            },
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "labels": {
+          "type": "text",
+          "analyzer": "ik_smart",
+          "position_increment_gap": 100,
+          "fields": {
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "cornerMark": {
+          "type": "text",
+          "analyzer": "ik_smart",
+          "fields": {
+            "raw": {
+              "type": "string",
+              "index": "not_analyzed"
+            }
+          }
+        },
+        "minLoanAmount": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "maxLoanAmount": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "minLoanRate": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "maxLoanRate": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "periodTimeUnit": {
+          "type": "keyword",
+          "index": "not_analyzed",
+          "ignore_above": 256
+        },
+        "onShelfTime": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "createTime": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        }
+      }
+    }
+  }
+}
