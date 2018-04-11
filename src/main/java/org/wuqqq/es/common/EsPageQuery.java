@@ -1,7 +1,4 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.common;
+package org.wuqqq.es.common;
 
 import io.searchbox.core.search.sort.Sort;
 import lombok.Getter;

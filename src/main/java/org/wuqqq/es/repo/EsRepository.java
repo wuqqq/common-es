@@ -1,12 +1,5 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.repo;
+package org.wuqqq.es.repo;
 
-import com.weidai.es.common.EsPageQuery;
-import com.weidai.es.common.EsPageResult;
-import com.weidai.es.common.EsRuntimeException;
-import com.weidai.es.util.EsUtils;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.core.*;
@@ -24,13 +17,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.wuqqq.es.common.EsPageQuery;
+import org.wuqqq.es.common.EsPageResult;
+import org.wuqqq.es.common.EsRuntimeException;
+import org.wuqqq.es.util.EsUtils;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.weidai.es.common.EsErrorEnum.*;
+import static org.wuqqq.es.common.EsErrorEnum.*;
 
 /**
  * @author wuqi 2018/2/5 0005.

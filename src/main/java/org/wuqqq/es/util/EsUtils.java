@@ -1,24 +1,20 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.util;
+package org.wuqqq.es.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.weidai.es.common.EsRuntimeException;
+import org.wuqqq.es.common.EsRuntimeException;
 import io.searchbox.annotations.JestId;
 import io.searchbox.annotations.JestVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.wuqqq.es.common.EsErrorEnum;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-
-import static com.weidai.es.common.EsErrorEnum.IO_EXCEPTION;
 
 /**
  * @author wuqi 2018/2/2 0002.
@@ -81,7 +77,7 @@ public class EsUtils {
             return json.toString();
         } catch (IOException e) {
             logger.error("load file {} failed: {}", path, e);
-            throw new EsRuntimeException(IO_EXCEPTION, e);
+            throw new EsRuntimeException(EsErrorEnum.IO_EXCEPTION, e);
         } finally {
             if (br != null) {
                 try {
