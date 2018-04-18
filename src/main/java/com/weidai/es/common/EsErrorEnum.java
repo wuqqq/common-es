@@ -17,9 +17,10 @@ public enum EsErrorEnum {
     DELETE_DOCUMENT_EXCEPTION("7000006", "删除文档异常"),
     BULK_INDEX_DOCS_EXCEPTION("7000007", "批量索引文档异常"),
     BULK_UPDATE_DOCS_EXCEPTION("7000008", "批量更新文档异常"),
-    SEARCH_INDEX_EXCEPTION("7000009", "查询索引异常"),
-    MODIFY_ALIASES_EXCEPTION("7000010", "修改索引别名异常"),
-    DELETE_INDEX_EXCEPTION("7000011", "删除索引异常");
+    BULK_DELETE_DOCS_EXCEPTION("7000009", "批量删除文档异常"),
+    SEARCH_INDEX_EXCEPTION("7000010", "查询索引异常"),
+    MODIFY_ALIASES_EXCEPTION("7000011", "修改索引别名异常"),
+    DELETE_INDEX_EXCEPTION("7000012", "删除索引异常");
 
     @Getter
     private final String code;
