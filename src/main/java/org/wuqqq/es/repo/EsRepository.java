@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.wuqqq.es.common.EsErrorEnum.*;
 
@@ -231,6 +232,32 @@ public abstract class EsRepository<T> {
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new EsRuntimeException(IO_EXCEPTION, e);
+        }
+    }
+
+    public void bulkDeleteDocs(List<String> idList){
+        if (!CollectionUtils.isEmpty(idList)) {
+            List<Delete> actions = idList.stream().map(id-> new Delete.Builder(id).build()).collect(Collectors.toList());
+            try {
+                BulkResult rs = getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
+                if (!rs.isSucceeded()) {
+                    if (rs.getFailedItems().isEmpty()) {
+                        logger.error("bulk delete docs failed, error message: {}", rs.getErrorMessage());
+                        throw new EsRuntimeException(BULK_DELETE_DOCS_EXCEPTION);
+                    } else {
+                        StringBuilder buffer = new StringBuilder();
+                        buffer.append("bulk delete docs failed: ");
+                        rs.getFailedItems().forEach(item -> buffer.append("[index: ").append(item.index).append(",type: ").append(item.type).append(",id: ")
+                                .append(item.id).append(",error: ").append(item.error).append("],"));
+                        String errorInfo = buffer.toString();
+                        logger.error(errorInfo.substring(0, errorInfo.length() - 1));
+                        throw new EsRuntimeException(BULK_DELETE_DOCS_EXCEPTION);
+                    }
+                }
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+                throw new EsRuntimeException(IO_EXCEPTION, e);
+            }
         }
     }
 
