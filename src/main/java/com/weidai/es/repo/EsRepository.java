@@ -291,6 +291,22 @@ public abstract class EsRepository<T> {
         }
     }
 
+    public T getDocById(String id){
+        if (StringUtils.isEmpty(id))
+            throw new IllegalArgumentException("document id mustn't be null or empty string");
+        try {
+            DocumentResult rs = getClient().execute(new Get.Builder(getAlias(), id).type(getType()).build());
+            if (!rs.isSucceeded()) {
+                logger.error("get doc failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
+                throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
+            }
+            return rs.getSourceAsObject(getParameterizedClass());
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new EsRuntimeException(IO_EXCEPTION, e);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private Class<T> getParameterizedClass() {
         return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
