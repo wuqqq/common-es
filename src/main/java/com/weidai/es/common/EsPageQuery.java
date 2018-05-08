@@ -56,8 +56,6 @@ public class EsPageQuery {
         public EsPageQueryBuilder size(int size) {
             if (size < 1)
                 size = 1;
-            else if (size > 200)
-                size = 200;
             query.size = size;
             return this;
         }
