@@ -38,6 +38,8 @@ public abstract class EsRepository<T> {
     private static final Logger logger = LoggerFactory.getLogger(EsRepository.class);
 
     public static final String INDEX_CONFIG_DIR = "es/index/config/";
+    
+    private volatile Class<T> clazz;
 
     public boolean checkIndexExists(String index) {
         try {
@@ -290,7 +292,9 @@ public abstract class EsRepository<T> {
 
     @SuppressWarnings("unchecked")
     private Class<T> getParameterizedClass() {
-        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        if (clazz == null)
+            clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        return clazz;
     }
 
     public long searchDistinctCount(QueryBuilder query, String distinctField) {
