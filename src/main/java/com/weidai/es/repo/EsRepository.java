@@ -42,6 +42,8 @@ public abstract class EsRepository<T> {
 
     public static final String INDEX_CONFIG_DIR = "es/index/config/";
 
+    private volatile Class<T> clazz;
+
     public boolean checkIndexExists(String index) {
         try {
             JestResult rs = getClient().execute(new IndicesExists.Builder(index).build());
@@ -309,7 +311,9 @@ public abstract class EsRepository<T> {
 
     @SuppressWarnings("unchecked")
     private Class<T> getParameterizedClass() {
-        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        if (clazz == null)
+            clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        return clazz;
     }
 
     public long searchDistinctCount(QueryBuilder query, String distinctField) {
