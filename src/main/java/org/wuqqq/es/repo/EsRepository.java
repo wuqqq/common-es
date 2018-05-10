@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.wuqqq.es.common.EsErrorEnum.*;
 
 /**
@@ -113,13 +113,14 @@ public abstract class EsRepository<T> {
         return EsUtils.loadJsonStringFromPath(INDEX_CONFIG_DIR + "default.json");
     }
 
-    public void indexDoc(T t) {
+    public String indexDoc(T t) {
         try {
             DocumentResult rs = getClient().execute(new Index.Builder(t).index(getAlias()).type(getType()).refresh(true).build());
             if (!rs.isSucceeded()) {
                 logger.error("index doc failed: [index: {}, type: {}, id: {}, error: {}]", getAlias(), getType(), getId(t), rs.getErrorMessage());
                 throw new EsRuntimeException(INDEX_DOCUMENT_EXCEPTION);
             }
+            return rs.getId();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new EsRuntimeException(IO_EXCEPTION, e);
@@ -148,7 +149,8 @@ public abstract class EsRepository<T> {
         bulkIndexDocs(getAlias(), tList);
     }
 
-    public void bulkIndexDocs(String index, List<T> tList) {
+    public List<String> bulkIndexDocs(String index, List<T> tList) {
+        List<String> idList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(tList)) {
             List<Index> actions = buildBulkIndexActions(tList);
             if (!CollectionUtils.isEmpty(actions)) {
@@ -168,12 +170,15 @@ public abstract class EsRepository<T> {
                             throw new EsRuntimeException(BULK_INDEX_DOCS_EXCEPTION);
                         }
                     }
+                    if (!CollectionUtils.isEmpty(rs.getItems()))
+                        idList = rs.getItems().stream().map(i -> i.id).collect(toList());
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                     throw new EsRuntimeException(IO_EXCEPTION, e);
                 }
             }
         }
+        return idList;
     }
 
     private List<Index> buildBulkIndexActions(List<T> tList) {
@@ -239,7 +244,7 @@ public abstract class EsRepository<T> {
 
     public void bulkDeleteDocs(List<String> idList){
         if (!CollectionUtils.isEmpty(idList)) {
-            List<Delete> actions = idList.stream().map(id-> new Delete.Builder(id).build()).collect(Collectors.toList());
+            List<Delete> actions = idList.stream().map(id-> new Delete.Builder(id).build()).collect(toList());
             try {
                 BulkResult rs = getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
                 if (!rs.isSucceeded()) {
