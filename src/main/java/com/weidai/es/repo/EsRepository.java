@@ -245,11 +245,12 @@ public abstract class EsRepository<T> {
         }
     }
 
-    public void bulkDeleteDocs(List<String> idList){
+    public void bulkDeleteDocs(List<String> idList) {
         if (!CollectionUtils.isEmpty(idList)) {
-            List<Delete> actions = idList.stream().map(id-> new Delete.Builder(id).build()).collect(toList());
+            List<Delete> actions = idList.stream().map(id -> new Delete.Builder(id).build()).collect(toList());
             try {
-                BulkResult rs = getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
+                BulkResult rs =
+                        getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
                 if (!rs.isSucceeded()) {
                     if (rs.getFailedItems().isEmpty()) {
                         logger.error("bulk delete docs failed, error message: {}", rs.getErrorMessage());
@@ -285,7 +286,10 @@ public abstract class EsRepository<T> {
             SearchResult rs = getClient().execute(searchBuilder.build());
             if (!rs.isSucceeded()) {
                 logger.error("search failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
-                throw new EsRuntimeException(SEARCH_INDEX_EXCEPTION);
+                if (rs.getResponseCode() >= 400 && rs.getResponseCode() < 500)
+                    return new EsPageResult<>();
+                else if (rs.getResponseCode() >= 500)
+                    throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
             }
             long hitCount = rs.getJsonObject().get("hits").getAsJsonObject().get("total").getAsLong();
             EsPageResult<T> result = new EsPageResult<>();
@@ -298,14 +302,17 @@ public abstract class EsRepository<T> {
         }
     }
 
-    public T getDocById(String id){
+    public T getDocById(String id) {
         if (StringUtils.isEmpty(id))
             throw new IllegalArgumentException("document id mustn't be null or empty string");
         try {
             DocumentResult rs = getClient().execute(new Get.Builder(getAlias(), id).type(getType()).build());
             if (!rs.isSucceeded()) {
                 logger.error("get doc failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
-                throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
+                if (rs.getResponseCode() >= 400 && rs.getResponseCode() < 500)
+                    return null;
+                if (rs.getResponseCode() >= 500)
+                    throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
             }
             return rs.getSourceAsObject(getParameterizedClass());
         } catch (IOException e) {
