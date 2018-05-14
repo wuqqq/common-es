@@ -311,7 +311,7 @@ public abstract class EsRepository<T> {
                 logger.error("get doc failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
                 if (rs.getResponseCode() >= 400 && rs.getResponseCode() < 500)
                     return null;
-                if (rs.getResponseCode() >= 500)
+                else if (rs.getResponseCode() >= 500)
                     throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
             }
             return rs.getSourceAsObject(getParameterizedClass());
