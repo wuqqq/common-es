@@ -40,7 +40,7 @@ public abstract class EsRepository<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(EsRepository.class);
 
-    public static final String INDEX_CONFIG_DIR = "es/index/config/";
+    public static final String INDEX_SETTINGS_DIR = "es/index/settings/";
 
     private volatile Class<T> clazz;
 
@@ -56,7 +56,8 @@ public abstract class EsRepository<T> {
 
     public void createIndex(String index) {
         try {
-            JestResult rs = getClient().execute(new CreateIndex.Builder(index).settings(getIndexJsonString()).build());
+            String settings = EsUtils.loadJsonStringFromPath(INDEX_SETTINGS_DIR + settingsJsonFileName());
+            JestResult rs = getClient().execute(new CreateIndex.Builder(index).settings(settings).build());
             if (rs.isSucceeded()) {
                 logger.info("create index {} successfully!", index);
             } else {
@@ -110,10 +111,6 @@ public abstract class EsRepository<T> {
             logger.error(e.getMessage(), e);
             throw new EsRuntimeException(IO_EXCEPTION, e);
         }
-    }
-
-    protected String getIndexJsonString() {
-        return EsUtils.loadJsonStringFromPath(INDEX_CONFIG_DIR + "default.json");
     }
 
     public String indexDoc(T t) {
@@ -344,6 +341,8 @@ public abstract class EsRepository<T> {
             throw new EsRuntimeException(IO_EXCEPTION, e);
         }
     }
+
+    protected abstract String settingsJsonFileName();
 
     protected abstract JestClient getClient();
 

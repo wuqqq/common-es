@@ -5,7 +5,6 @@ package com.weidai.es.test.repo;
 
 import com.weidai.es.repo.EsRepository;
 import com.weidai.es.test.domain.GoodsIndexBO;
-import com.weidai.es.util.EsUtils;
 import io.searchbox.client.JestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,13 +23,13 @@ public class GoodsIndexRepository extends EsRepository<GoodsIndexBO> {
     }
 
     @Override
-    protected JestClient getClient() {
-        return jestClient;
+    protected String settingsJsonFileName() {
+        return "GoodsIndex.json";
     }
 
     @Override
-    protected String getIndexJsonString() {
-        return EsUtils.loadJsonStringFromPath(INDEX_CONFIG_DIR + "GoodsIndex.json");
+    protected JestClient getClient() {
+        return jestClient;
     }
 
     @Override
