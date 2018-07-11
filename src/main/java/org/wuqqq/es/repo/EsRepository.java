@@ -37,8 +37,8 @@ public abstract class EsRepository<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(EsRepository.class);
 
-    public static final String INDEX_CONFIG_DIR = "es/index/config/";
-    
+    public static final String INDEX_SETTINGS_DIR = "es/index/settings/";
+
     private volatile Class<T> clazz;
 
     public boolean checkIndexExists(String index) {
@@ -53,7 +53,8 @@ public abstract class EsRepository<T> {
 
     public void createIndex(String index) {
         try {
-            JestResult rs = getClient().execute(new CreateIndex.Builder(index).settings(getIndexJsonString()).build());
+            String settings = EsUtils.loadJsonStringFromPath(INDEX_SETTINGS_DIR + settingsJsonFileName());
+            JestResult rs = getClient().execute(new CreateIndex.Builder(index).settings(settings).build());
             if (rs.isSucceeded()) {
                 logger.info("create index {} successfully!", index);
             } else {
@@ -109,10 +110,6 @@ public abstract class EsRepository<T> {
         }
     }
 
-    protected String getIndexJsonString() {
-        return EsUtils.loadJsonStringFromPath(INDEX_CONFIG_DIR + "default.json");
-    }
-
     public String indexDoc(T t) {
         try {
             DocumentResult rs = getClient().execute(new Index.Builder(t).index(getAlias()).type(getType()).refresh(true).build());
@@ -150,7 +147,7 @@ public abstract class EsRepository<T> {
     }
 
     public List<String> bulkIndexDocs(String index, List<T> tList) {
-        List<String> idList = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
         if (!CollectionUtils.isEmpty(tList)) {
             List<Index> actions = buildBulkIndexActions(tList);
             if (!CollectionUtils.isEmpty(actions)) {
@@ -171,14 +168,14 @@ public abstract class EsRepository<T> {
                         }
                     }
                     if (!CollectionUtils.isEmpty(rs.getItems()))
-                        idList = rs.getItems().stream().map(i -> i.id).collect(toList());
+                        ids = rs.getItems().stream().map(i -> i.id).collect(toList());
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                     throw new EsRuntimeException(IO_EXCEPTION, e);
                 }
             }
         }
-        return idList;
+        return ids;
     }
 
     private List<Index> buildBulkIndexActions(List<T> tList) {
@@ -242,11 +239,12 @@ public abstract class EsRepository<T> {
         }
     }
 
-    public void bulkDeleteDocs(List<String> idList){
+    public void bulkDeleteDocs(List<String> idList) {
         if (!CollectionUtils.isEmpty(idList)) {
-            List<Delete> actions = idList.stream().map(id-> new Delete.Builder(id).build()).collect(toList());
+            List<Delete> actions = idList.stream().map(id -> new Delete.Builder(id).build()).collect(toList());
             try {
-                BulkResult rs = getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
+                BulkResult rs =
+                        getClient().execute(new Bulk.Builder().defaultIndex(getAlias()).defaultType(getType()).addAction(actions).refresh(true).build());
                 if (!rs.isSucceeded()) {
                     if (rs.getFailedItems().isEmpty()) {
                         logger.error("bulk delete docs failed, error message: {}", rs.getErrorMessage());
@@ -282,13 +280,35 @@ public abstract class EsRepository<T> {
             SearchResult rs = getClient().execute(searchBuilder.build());
             if (!rs.isSucceeded()) {
                 logger.error("search failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
-                throw new EsRuntimeException(SEARCH_INDEX_EXCEPTION);
+                if (rs.getResponseCode() >= 400 && rs.getResponseCode() < 500)
+                    return new EsPageResult<>();
+                else if (rs.getResponseCode() >= 500)
+                    throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
             }
             long hitCount = rs.getJsonObject().get("hits").getAsJsonObject().get("total").getAsLong();
             EsPageResult<T> result = new EsPageResult<>();
             result.setDataList(rs.getSourceAsObjectList(getParameterizedClass(), true));
             result.setTotalCount(hitCount);
             return result;
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+            throw new EsRuntimeException(IO_EXCEPTION, e);
+        }
+    }
+
+    public T getDocById(String id) {
+        if (StringUtils.isEmpty(id))
+            throw new IllegalArgumentException("document id mustn't be null or empty string");
+        try {
+            DocumentResult rs = getClient().execute(new Get.Builder(getAlias(), id).type(getType()).build());
+            if (!rs.isSucceeded()) {
+                logger.error("get doc failed: [index: {}, type: {}, error: {}]", getAlias(), getType(), rs.getErrorMessage());
+                if (rs.getResponseCode() >= 400 && rs.getResponseCode() < 500)
+                    return null;
+                else if (rs.getResponseCode() >= 500)
+                    throw new EsRuntimeException(SEARCH_DOCUMENT_EXCEPTION);
+            }
+            return rs.getSourceAsObject(getParameterizedClass());
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             throw new EsRuntimeException(IO_EXCEPTION, e);
@@ -318,6 +338,8 @@ public abstract class EsRepository<T> {
             throw new EsRuntimeException(IO_EXCEPTION, e);
         }
     }
+
+    protected abstract String settingsJsonFileName();
 
     protected abstract JestClient getClient();
 

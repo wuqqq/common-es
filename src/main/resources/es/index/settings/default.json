@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "my_pinyin": {
+          "type": "pinyin",
+          "keep_joined_full_pinyin": true,
+          "keep_none_chinese_in_joined_full_pinyin": true
+        }
+      },
+      "analyzer": {
+        "ik_pinyin": {
+          "type": "custom",
+          "tokenizer": "ik_max_word",
+          "filter": ["my_pinyin", "word_delimiter"]
+        }
+      }
+    }
+  }
+}

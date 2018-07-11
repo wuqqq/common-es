@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EsPageResult<T> {
 
-    private long totalCount;
+    private long totalCount = 0L;
 
     private List<T> dataList;
 }
