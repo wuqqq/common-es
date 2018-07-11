@@ -1,7 +1,4 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.test.repo;
+package org.wuqqq.es.test;
 
 import io.searchbox.annotations.JestId;
 import io.searchbox.annotations.JestVersion;

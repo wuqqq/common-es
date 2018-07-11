@@ -1,12 +1,8 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.test;
+package org.wuqqq.es.test;
+
+import org.wuqqq.es.common.EsPageResult;
 
 import java.util.List;
-
-import com.weidai.es.common.EsPageResult;
-import com.weidai.mario.goods.facade.vo.GoodsPageQueryVO;
 
 /**
  * @author wuqi 2018/2/1 0001.

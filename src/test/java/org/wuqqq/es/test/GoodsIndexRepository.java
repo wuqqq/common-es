@@ -1,4 +1,4 @@
-package com.weidai.es.test.repo;
+package org.wuqqq.es.test;
 
 import io.searchbox.client.JestClient;
 import org.springframework.beans.factory.annotation.Autowired;

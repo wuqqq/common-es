@@ -1,14 +1,10 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.test;
+package org.wuqqq.es.test;
+
+import lombok.Data;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.validator.constraints.Range;
-
-import lombok.Data;
 
 /**
  * @author wuqi 2018/3/6 0006.
@@ -32,7 +28,7 @@ public class GoodsPageQueryVO {
     private String goodsName;
 
     /**
-     * 商品类型，{@link com.weidai.mario.goods.facade.constant.GoodsModeEnum}
+     * 商品类型
      */
     private Integer goodsMode;
 

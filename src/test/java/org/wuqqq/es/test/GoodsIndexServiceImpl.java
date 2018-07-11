@@ -1,13 +1,6 @@
-/**
- * Copyright (C), 2011-2018, 微贷网.
- */
-package com.weidai.es.test;
+package org.wuqqq.es.test;
 
-import static io.searchbox.core.search.sort.Sort.Sorting.DESC;
-import static java.util.stream.Collectors.toList;
-
-import java.util.List;
-
+import io.searchbox.core.search.sort.Sort;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.collapse.CollapseBuilder;
@@ -17,12 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.wuqqq.es.common.EsPageQuery;
+import org.wuqqq.es.common.EsPageResult;
 
-import com.weidai.es.common.EsPageQuery;
-import com.weidai.es.common.EsPageResult;
-import com.weidai.mario.goods.facade.vo.GoodsPageQueryVO;
+import java.util.List;
 
-import io.searchbox.core.search.sort.Sort;
+import static io.searchbox.core.search.sort.Sort.Sorting.DESC;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author wuqi 2018/2/1 0001.
